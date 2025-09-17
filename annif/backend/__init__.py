@@ -21,7 +21,7 @@ def _ebm() -> Type[AnnifBackend]:
 
         return ebm.EbmBackend
     except ImportError:
-        raise ValueError("EBM not available, cannot use stwfsa backend")
+        raise ValueError("EBM not available, cannot use ebm backend")
 
 
 def _ensemble() -> Type[AnnifBackend]:
