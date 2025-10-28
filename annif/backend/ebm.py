@@ -196,9 +196,14 @@ class EbmBackend(backend.AnnifBackend):
         )
 
         predictions = self._model.predict(candidates)
+        # Build a mapping from doc_id to DataFrame
+        docid_to_df = {df['doc_id'][0]: df for df in predictions}
+        
+        # Reorder predictions by doc_id
+        ordered_predictions = [docid_to_df[f'{i}'] for i in range(len(texts))]
 
         suggestions = []
-        for doc_predictions in predictions:
+        for doc_predictions in ordered_predictions:
             vector = np.zeros(len(self.project.subjects), dtype=np.float32)
             for row in doc_predictions.iter_rows(named=True):
                 position = self.project.subjects._uri_idx.get(row["label_id"], 0)
