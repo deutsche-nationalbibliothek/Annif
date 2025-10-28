@@ -5,6 +5,7 @@ import joblib
 import numpy as np
 from ebm4subjects.ebm_model import EbmModel
 
+from annif.analyzer.analyzer import Analyzer
 from annif.corpus.document import DocumentCorpus
 from annif.exception import NotInitializedException, NotSupportedException
 from annif.suggestion import SuggestionBatch, vector_to_suggestions
@@ -22,7 +23,6 @@ class EbmBackend(backend.AnnifBackend):
         "duck_db_threads": int,
         "embedding_model_name": str,
         "embedding_dimensions": int,
-        "chunk_tokenizer": str,
         "max_chunks": int,
         "max_chunk_size": int,
         "chunking_jobs": int,
@@ -47,7 +47,6 @@ class EbmBackend(backend.AnnifBackend):
         "duckdb_threads": 42,
         "embedding_model_name": "jinaai/jina-embeddings-v3",
         "embedding_dimensions": 1024,
-        "chunk_tokenizer": "tokenizers/punkt/german.pickle",
         "max_chunks": 100,
         "max_chunk_size": 50,
         "chunking_jobs": 1,
@@ -78,6 +77,8 @@ class EbmBackend(backend.AnnifBackend):
     MODEL_FILE = "ebm-model.gz"
     TRAIN_FILE = "ebm-train.gz"
 
+    _analyzer = Analyzer()
+
     _model = None
 
     def initialize(self, parallel: bool = False) -> None:
@@ -107,7 +108,7 @@ class EbmBackend(backend.AnnifBackend):
             duckdb_threads=params["duckdb_threads"],
             embedding_model_name=params["embedding_model_name"],
             embedding_dimensions=params["embedding_dimensions"],
-            chunk_tokenizer=params["chunk_tokenizer"],
+            chunk_tokenizer=self._analyzer,
             max_chunks=params["max_chunks"],
             max_chunk_size=params["max_chunk_size"],
             chunking_jobs=params["chunking_jobs"],
