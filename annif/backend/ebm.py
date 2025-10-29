@@ -44,32 +44,33 @@ class EbmBackend(backend.AnnifBackend):
     DEFAULT_PARAMETERS = {
         "collection_name": "my_collection",
         "use_altLabels": True,
-        "duckdb_threads": 42,
-        "embedding_model_name": "jinaai/jina-embeddings-v3",
+        "duckdb_threads": 1,
+        "embedding_model_name": "BAAI/bge-m3",
         "embedding_dimensions": 1024,
         "max_chunks": 100,
         "max_chunk_size": 50,
         "chunking_jobs": 1,
-        "max_sentences": 10000,
+        "max_sentences": 100,
         "hnsw_index_params": {"M": 32, "ef_construction": 256, "ef_search": 256},
         "max_query_hits": 20,
         "query_top_k": 100,
         "query_jobs": 1,
-        "xgb_shrinkage": 0.023,
-        "xgb_interaction_depth": 7,
-        "xgb_subsample": 0.62,
-        "xgb_rounds": 812,
+        "xgb_shrinkage": 0.03,
+        "xgb_interaction_depth": 5,
+        "xgb_subsample": 0.7,
+        "xgb_rounds": 300,
         "xgb_jobs": 1,
-        "model_args": {"device": "cuda", "trust_remote_code": True},
+        "model_args": {
+            "device": "cpu",
+            "trust_remote_code": False
+        },
         "encode_args_vocab": {
-            "batch_size": 300,
-            "show_progress_bar": True,
-            "task": "retrieval.passage",
+            "batch_size": 32,
+            "show_progress_bar": True
         },
         "encode_args_documents": {
-            "batch_size": 300,
-            "show_progress_bar": True,
-            "task": "retrieval.passage",
+            "batch_size": 32,
+            "show_progress_bar": True
         },
     }
 
