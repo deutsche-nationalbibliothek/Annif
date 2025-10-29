@@ -105,7 +105,7 @@ class EbmBackend(backend.AnnifBackend):
             db_path=os.path.join(self.datadir, self.DB_FILE),
             collection_name=params["collection_name"],
             use_altLabels=params["use_altLabels"],
-            duckdb_threads=params["duckdb_threads"],
+            duckdb_threads=jobs if jobs else params["duckdb_threads"],
             embedding_model_name=params["embedding_model_name"],
             embedding_dimensions=params["embedding_dimensions"],
             chunk_tokenizer=self._analyzer,
@@ -125,6 +125,7 @@ class EbmBackend(backend.AnnifBackend):
             model_args=params["model_args"],
             encode_args_vocab=params["encode_args_vocab"],
             encode_args_documents=params["encode_args_documents"],
+            logger=self,
         )
 
         if corpus != "cached":
