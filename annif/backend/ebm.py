@@ -6,7 +6,7 @@ import numpy as np
 from ebm4subjects.ebm_model import EbmModel
 
 from annif.analyzer.analyzer import Analyzer
-from annif.corpus.document import DocumentCorpus
+from annif.corpus.document import Document, DocumentCorpus
 from annif.exception import NotInitializedException, NotSupportedException
 from annif.suggestion import SuggestionBatch, vector_to_suggestions
 from annif.util import atomic_save
@@ -89,6 +89,7 @@ class EbmBackend(backend.AnnifBackend):
             self.debug(f"loading model from {path}")
             if os.path.exists(path):
                 self._model = EbmModel.load(path)
+                self._model.init_logger(logger=self)
                 self.debug("loaded model")
             else:
                 raise NotInitializedException(
@@ -191,11 +192,11 @@ class EbmBackend(backend.AnnifBackend):
         atomic_save(self._model, self.datadir, self.MODEL_FILE)
 
     def _suggest_batch(
-        self, texts: list[str], params: dict[str, Any]
+        self, documents: list[Document], params: dict[str, Any]
     ) -> SuggestionBatch:
         candidates = self._model.generate_candidates_batch(
-            texts=texts,
-            doc_ids=[i for i in range(len(texts))],
+            texts=[doc.text for doc in documents],
+            doc_ids=[i for i in range(len(documents))],
         )
 
         predictions = self._model.predict(candidates)
