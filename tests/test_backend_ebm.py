@@ -14,9 +14,7 @@ def test_ebm_default_params(project):
     ebm_type = annif.backend.get_backend("ebm")
     ebm = ebm_type(backend_id="ebm", config_params={}, project=project)
 
-    expected_default_params = {
-        "limit": 100  # from AnnifBackend class
-    }
+    expected_default_params = {"limit": 100}
     actual_params = ebm.params
     for param, val in expected_default_params.items():
         assert param in actual_params and actual_params[param] == val
