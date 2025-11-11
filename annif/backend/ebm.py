@@ -18,9 +18,6 @@ class EbmBackend(backend.AnnifBackend):
     name = "ebm"
 
     EBM_PARAMETERS = {
-        "collection_name": str,
-        "use_altLabels": bool,
-        "duck_db_threads": int,
         "embedding_model_name": str,
         "embedding_dimensions": int,
         "max_chunk_count": int,
@@ -36,15 +33,14 @@ class EbmBackend(backend.AnnifBackend):
         "xgb_subsample": float,
         "xgb_rounds": int,
         "xgb_jobs": int,
+        "duck_db_threads": int,
+        "use_altLabels": bool,
         "model_args": dict[str, Any],
         "encode_args_vocab": dict[str, Any],
         "encode_args_documents": dict[str, Any],
     }
 
     DEFAULT_PARAMETERS = {
-        "collection_name": "my_collection",
-        "use_altLabels": True,
-        "duckdb_threads": 1,
         "embedding_model_name": "BAAI/bge-m3",
         "embedding_dimensions": 1024,
         "max_chunk_count": 100,
@@ -60,18 +56,11 @@ class EbmBackend(backend.AnnifBackend):
         "xgb_subsample": 0.7,
         "xgb_rounds": 300,
         "xgb_jobs": 1,
-        "model_args": {
-            "device": "cpu",
-            "trust_remote_code": False
-        },
-        "encode_args_vocab": {
-            "batch_size": 32,
-            "show_progress_bar": True
-        },
-        "encode_args_documents": {
-            "batch_size": 32,
-            "show_progress_bar": True
-        },
+        "duckdb_threads": 1,
+        "use_altLabels": True,
+        "model_args": {"device": "cpu", "trust_remote_code": False},
+        "encode_args_vocab": {"batch_size": 32, "show_progress_bar": True},
+        "encode_args_documents": {"batch_size": 32, "show_progress_bar": True},
     }
 
     DB_FILE = "ebm-duck.db"
@@ -105,9 +94,6 @@ class EbmBackend(backend.AnnifBackend):
         self.info("starting train")
         self._model = EbmModel(
             db_path=os.path.join(self.datadir, self.DB_FILE),
-            collection_name=params["collection_name"],
-            use_altLabels=params["use_altLabels"],
-            duckdb_threads=jobs if jobs else params["duckdb_threads"],
             embedding_model_name=params["embedding_model_name"],
             embedding_dimensions=params["embedding_dimensions"],
             chunk_tokenizer=self._analyzer,
@@ -124,6 +110,8 @@ class EbmBackend(backend.AnnifBackend):
             xgb_subsample=params["xgb_subsample"],
             xgb_rounds=params["xgb_rounds"],
             xgb_jobs=params["xgb_jobs"],
+            duckdb_threads=jobs if jobs else params["duckdb_threads"],
+            use_altLabels=params["use_altLabels"],
             model_args=params["model_args"],
             encode_args_vocab=params["encode_args_vocab"],
             encode_args_documents=params["encode_args_documents"],
