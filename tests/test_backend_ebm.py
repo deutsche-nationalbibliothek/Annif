@@ -14,7 +14,7 @@ _backend_conf = {
     "language": "fi",
     "limit": 10,
     "embedding_model_name": None,
-    "embedding_model_type": "mock",
+    "embedding_model_deployment": "mock",
     "embedding_model_args": None,
     "embedding_dimensions": 1024,
 }
