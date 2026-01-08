@@ -7,7 +7,6 @@ import annif.backend
 from annif.corpus import Document
 from annif.exception import NotInitializedException, NotSupportedException
 
-
 ebm = pytest.importorskip("annif.backend.ebm")
 
 _backend_conf = {
