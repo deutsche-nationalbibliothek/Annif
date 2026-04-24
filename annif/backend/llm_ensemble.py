@@ -155,6 +155,7 @@ class LLMEnsembleBackend(BaseLLMBackend, ensemble.EnsembleBackend):
         "labels_language": "en",
         "sources_limit": 10,
         "max_workers": 32,
+        "prompt_file": None
     }
 
     def get_hp_optimizer(self, corpus: DocumentCorpus, metric: str) -> None:
@@ -196,7 +197,7 @@ class LLMEnsembleBackend(BaseLLMBackend, ensemble.EnsembleBackend):
         max_prompt_tokens = int(params["max_prompt_tokens"])
         max_workers = int(params["max_workers"])
 
-        system_prompt = textwrap.dedent(
+        default_system_prompt = textwrap.dedent(
             """\
             You will be given text and a list of keywords to describe it. Your task is
             to score the keywords with a value between 0 and 100. The score value
@@ -210,6 +211,20 @@ class LLMEnsembleBackend(BaseLLMBackend, ensemble.EnsembleBackend):
             the input keyword list; do not skip scoring any keywords.
         """
         )
+
+        if params["prompt_file"] is None:
+            system_prompt = default_system_prompt
+        else:
+            try:
+                with open(params["prompt_file"], 'r') as file:
+                    system_prompt = file.read().strip()
+            except FileNotFoundError:
+                print(f"Warning: Prompt file '{params['prompt_file']}' not found. Using default prompt.")
+                system_prompt = default_system_prompt
+            except Exception as e:
+                print(f"Error reading prompt file: {e}. Using default prompt.")
+                system_prompt = default_system_prompt
+
 
         labels_batch = self._get_labels_batch(suggestion_batch)
 
