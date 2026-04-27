@@ -5,6 +5,7 @@ from __future__ import annotations
 import concurrent.futures
 import json
 import os
+from string import Template
 import textwrap
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -155,7 +156,8 @@ class LLMEnsembleBackend(BaseLLMBackend, ensemble.EnsembleBackend):
         "labels_language": "en",
         "sources_limit": 10,
         "max_workers": 32,
-        "prompt_file": None
+        "system_prompt_file": None,
+        "user_prompt_template": None
     }
 
     def get_hp_optimizer(self, corpus: DocumentCorpus, metric: str) -> None:
@@ -212,28 +214,49 @@ class LLMEnsembleBackend(BaseLLMBackend, ensemble.EnsembleBackend):
         """
         )
 
-        if params["prompt_file"] is None:
+        if params["system_prompt_file"] is None:
             system_prompt = default_system_prompt
         else:
             try:
-                with open(params["prompt_file"], 'r') as file:
+                with open(params["system_prompt_file"], 'r') as file:
                     system_prompt = file.read().strip()
             except FileNotFoundError:
-                print(f"Warning: Prompt file '{params['prompt_file']}' not found. Using default prompt.")
+                self.warning(f"Warning: Prompt file '{params['system_prompt_file']}' not found. Using default prompt.")
                 system_prompt = default_system_prompt
             except Exception as e:
-                print(f"Error reading prompt file: {e}. Using default prompt.")
+                self.warning(f"Error reading prompt file: {e}. Using default prompt.")
                 system_prompt = default_system_prompt
 
+        default_user_prompt_template = textwrap.dedent(
+            """\
+            Here are the keywords:
+            $labels
+            Here is the text:
+            $text
+            """
+        )
+
+        if params["user_prompt_template"] is None:
+            user_prompt_template = Template(default_user_prompt_template)
+        else:
+            try:
+                with open(params["user_prompt_template"], 'r') as file:
+                    user_prompt_template = Template(file.read())
+            except FileNotFoundError:
+                self.warning(f"Warning: Prompt template '{params['user_prompt_template']}' not found. Using default prompt template.")
+                user_prompt_template = default_user_prompt_template
+            except Exception as e:
+                self.warning(f"Error reading prompt template: {e}. Using default prompt template.")
+                user_prompt_template = default_user_prompt_template
 
         labels_batch = self._get_labels_batch(suggestion_batch)
 
         def process_single_prompt(text, labels):
-            user_prompt = "Here are the keywords:\n" + "\n".join(labels) + "\n\n"
+            labels_str = "\n".join(labels)
+            user_prompt = user_prompt_template.substitute(labels=labels_str, text=text)
             if max_prompt_tokens > 0:
                 text = self._truncate_text(text, max_prompt_tokens)
 
-            user_prompt += "Here is the text:\n" + text
             self.debug(f'LLM system prompt: "{system_prompt}"')
             self.debug(f'LLM user prompt: "{user_prompt}"')
 
